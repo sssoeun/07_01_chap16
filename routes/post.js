@@ -25,6 +25,25 @@ router.post('/post/photo', upload.single('picture'), (req, res) => {
 });
 
 
+///////검색기능
+router.get('/post/search', async function (req, res) {
+  console.log(req.query);
+  const { mongodb } = await setup();
+  const searchValue = req.query.value;
+  mongodb
+    .collection('post')
+    .find({ title: new RegExp(searchValue, 'i') }) // 대소문자 구분 없이 검색
+    .toArray()
+    .then((result) => {
+      console.log(result);
+      res.render('post/list.ejs', { data: result, currentPage: 1, totalPages: 1 }); // 페이지 관련 로직 필요 시 수정
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('서버 오류');
+    });
+});
+
 ////로그인 된 사용자만 게시물 삭제해주기. 이때 자기글에 대해서만 삭제 가능하도록 해야함.
 router.post("/post/delete", async (req, res) => {
   //console.log(req.body, "\n===============");
